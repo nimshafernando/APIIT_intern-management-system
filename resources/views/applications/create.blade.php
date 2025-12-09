@@ -87,10 +87,10 @@
 
                             <!-- Manual CV Upload -->
                             <div class="md:col-span-2">
-                                <x-input-label for="cv_path" :value="__('Or Upload New CV (PDF)')" />
-                                <input id="cv_path" type="file" name="cv_path" accept=".pdf" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full" required />
-                                <p class="mt-1 text-sm text-gray-500">Maximum file size: 10MB. Only PDF files are accepted.</p>
-                                <x-input-error :messages="$errors->get('cv_path')" class="mt-2" />
+                                <x-input-label for="cv_file" :value="__('Or Upload New CV (PDF)')" />
+                                <input id="cv_file" type="file" name="cv_file" accept=".pdf,.doc,.docx" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full" />
+                                <p class="mt-1 text-sm text-gray-500">Maximum file size: 5MB. Accepted formats: PDF, DOC, DOCX.</p>
+                                <x-input-error :messages="$errors->get('cv_file')" class="mt-2" />
                             </div>
 
                             <!-- Status (Hidden - default to Pending) -->

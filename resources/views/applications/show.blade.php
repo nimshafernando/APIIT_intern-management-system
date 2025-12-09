@@ -174,12 +174,30 @@
                             <!-- CV Download -->
                             <div>
                                 <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Submitted CV</p>
-                                <a href="{{ Storage::url($application->cv_path) }}" target="_blank" class="inline-flex items-center px-6 py-3 bg-teal-500 border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-teal-600 shadow-md transition-all">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    Download CV (PDF)
-                                </a>
+                                @if($application->cv_file_path)
+                                    <div class="flex items-center space-x-4">
+                                        <a href="{{ Storage::url($application->cv_file_path) }}" target="_blank" class="inline-flex items-center px-6 py-3 bg-teal-500 border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-teal-600 shadow-md transition-all">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            Download CV
+                                        </a>
+                                        <div class="text-sm text-gray-600">
+                                            <p class="font-medium">{{ basename($application->cv_file_path) }}</p>
+                                            <p class="text-xs">Uploaded: {{ $application->created_at->format('M j, Y g:i A') }}</p>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="flex items-center p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                                        <svg class="w-5 h-5 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-sm font-medium text-orange-800">No CV Uploaded</p>
+                                            <p class="text-xs text-orange-600">Student has not uploaded a CV for this application</p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Notes -->
