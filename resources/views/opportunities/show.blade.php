@@ -25,24 +25,10 @@
                         <!-- Company Logo -->
                         @php
                             $logoSrc = null;
-                            $companyDomain = null;
                             
-                            // Extract domain from company email or website if available
-                            if ($opportunity->company->email) {
-                                $companyDomain = explode('@', $opportunity->company->email)[1] ?? null;
-                            } elseif ($opportunity->company->website) {
-                                $companyDomain = str_replace(['http://', 'https://', 'www.'], '', $opportunity->company->website);
-                                $companyDomain = explode('/', $companyDomain)[0] ?? null;
-                            }
-                            
-                            // Try Clearbit API if we have a domain
-                            if ($companyDomain) {
-                                $logoSrc = "https://logo.clearbit.com/" . $companyDomain;
-                            }
-                            
-                            // Fallback to uploaded logo if available
-                            if ($opportunity->company->logo) {
-                                $logoSrc = Storage::url($opportunity->company->logo);
+                            // Use the company's logo_url attribute which now uses Google Favicon API
+                            if ($opportunity->company->logo_url) {
+                                $logoSrc = $opportunity->company->logo_url;
                             }
                         @endphp
                         

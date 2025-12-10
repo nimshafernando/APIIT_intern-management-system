@@ -24,7 +24,7 @@ class Company extends Model
     ];
 
     /**
-     * Get the company logo URL from Clearbit API based on website domain
+     * Get the company logo URL from Google Favicon API based on website domain
      * 
      * @return string|null
      */
@@ -43,7 +43,7 @@ class Company extends Model
             $domain = substr($domain, 4);
         }
 
-        return $domain ? "https://logo.clearbit.com/{$domain}" : null;
+        return $domain ? "https://www.google.com/s2/favicons?domain={$domain}&sz=128" : null;
     }
 
     public function applications(): HasMany

@@ -65,66 +65,16 @@
                                         <div class="flex items-start space-x-4 mb-4">
                                             <!-- Company Logo -->
                                             <div class="flex-shrink-0">
-                                                @php
-                                                    // Generate multiple logo sources with aggressive domain detection
-                                                    $logoSources = [];
-                                                    
-                                                    // Method 1: Use website domain if available
-                                                    if(!empty($company->website)) {
-                                                        $domain = parse_url($company->website, PHP_URL_HOST) ?? $company->website;
-                                                        $domain = str_replace(['www.', 'http://', 'https://'], '', strtolower($domain));
-                                                        $logoSources[] = "https://logo.clearbit.com/{$domain}";
-                                                    }
-                                                    
-                                                    // Method 2: Extract domain from email
-                                                    if(!empty($company->contact_email)) {
-                                                        $emailDomain = substr(strrchr($company->contact_email, "@"), 1);
-                                                        if($emailDomain && !in_array($emailDomain, ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com'])) {
-                                                            $logoSources[] = "https://logo.clearbit.com/{$emailDomain}";
-                                                        }
-                                                    }
-                                                    
-                                                    // Method 3: Guess common domains from company name
-                                                    $companyName = strtolower(trim($company->name));
-                                                    $cleanName = preg_replace('/[^a-z0-9]/', '', str_replace([' inc', ' ltd', ' llc', ' corp', ' company', ' co', ' pvt', ' private', ' limited'], '', $companyName));
-                                                    if(strlen($cleanName) >= 3) {
-                                                        $logoSources[] = "https://logo.clearbit.com/{$cleanName}.com";
-                                                        $logoSources[] = "https://logo.clearbit.com/{$cleanName}.lk"; // Sri Lankan domains
-                                                        $logoSources[] = "https://logo.clearbit.com/{$cleanName}.org";
-                                                    }
-                                                    
-                                                    // Method 4: Try with common variations
-                                                    $words = explode(' ', strtolower(trim($company->name)));
-                                                    if(count($words) >= 1) {
-                                                        $firstWord = preg_replace('/[^a-z0-9]/', '', $words[0]);
-                                                        if(strlen($firstWord) >= 3) {
-                                                            $logoSources[] = "https://logo.clearbit.com/{$firstWord}.com";
-                                                        }
-                                                    }
-                                                    
-                                                    // Remove duplicates
-                                                    $logoSources = array_unique($logoSources);
-                                                @endphp
-                                                
-                                                <div class="relative w-24 h-24">
-                                                    <!-- Company Logo Image -->
-                                                    @if(count($logoSources) > 0)
-                                                        <img id="company-logo-{{ $company->id }}" 
-                                                             src="{{ $logoSources[0] }}" 
-                                                             alt="{{ $company->name }} logo"
-                                                             class="absolute inset-0 object-contain w-24 h-24 p-2 bg-white border border-gray-200 rounded-md shadow-sm"
-                                                             style="display: block;"
-                                                             onload="this.style.display='block'; document.getElementById('company-fallback-{{ $company->id }}').style.display='none';"
-                                                             onerror="handleCompanyLogoError(this, {{ json_encode(array_slice($logoSources, 1)) }}, '{{ $company->id }}')">
-                                                    @endif
-                                                    
-                                                    <!-- Fallback with company initial -->
-                                                    <div id="company-fallback-{{ $company->id }}" 
-                                                         class="absolute inset-0 flex items-center justify-center w-24 h-24 text-white border border-gray-200 rounded-md shadow-sm bg-gradient-to-br from-green-500 to-teal-600"
-                                                         style="display: {{ count($logoSources) > 0 ? 'none' : 'flex' }};">
+                                                @if($company->logo_url)
+                                                    <img src="{{ $company->logo_url }}" 
+                                                         alt="{{ $company->name }} logo"
+                                                         class="h-24 w-24 object-contain rounded-md bg-gray-50 border border-gray-200 p-2 shadow-sm"
+                                                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'h-24 w-24 rounded-md bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white border border-gray-200 shadow-sm\'><span class=\'text-2xl font-bold\'>{{ strtoupper(substr($company->name, 0, 1)) }}</span></div>';">
+                                                @else
+                                                    <div class="h-24 w-24 rounded-md bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white border border-gray-200 shadow-sm">
                                                         <span class="text-2xl font-bold">{{ strtoupper(substr($company->name, 0, 1)) }}</span>
                                                     </div>
-                                                </div>
+                                                @endif
                                             </div>
 
                                             <!-- Company Info -->
@@ -195,58 +145,6 @@
     </div>
 
     <script>
-        function handleCompanyLogoError(img, fallbackUrls, companyId) {
-            // Hide the failed image
-            img.style.display = 'none';
-            
-            // Try next URL in the fallback array
-            if (fallbackUrls && fallbackUrls.length > 0) {
-                const nextUrl = fallbackUrls.shift();
-                
-                // Update the same image element instead of creating new ones
-                img.src = nextUrl;
-                img.onload = function() {
-                    this.style.display = 'block';
-                    const fallbackDiv = document.getElementById('company-fallback-' + companyId);
-                    if (fallbackDiv) {
-                        fallbackDiv.style.display = 'none';
-                    }
-                };
-                img.onerror = function() {
-                    handleCompanyLogoError(this, fallbackUrls, companyId);
-                };
-                
-                // Show image again to try loading
-                img.style.display = 'block';
-            } else {
-                // All URLs failed, show the fallback div with company initial
-                const fallbackDiv = document.getElementById('company-fallback-' + companyId);
-                if (fallbackDiv) {
-                    fallbackDiv.style.display = 'flex';
-                }
-                img.style.display = 'none';
-            }
-        }
-
-        // Add a timeout for logo loading to show fallback faster
-        document.addEventListener('DOMContentLoaded', function() {
-            const logoImages = document.querySelectorAll('img[id^="company-logo-"]');
-            logoImages.forEach(function(img) {
-                const timeoutId = setTimeout(function() {
-                    if (!img.complete || !img.naturalWidth) {
-                        // Image hasn't loaded, trigger error handler
-                        if (img.onerror) {
-                            img.onerror();
-                        }
-                    }
-                }, 3000); // 3 second timeout
-                
-                img.onload = function() {
-                    clearTimeout(timeoutId);
-                };
-            });
-        });
-
         function confirmDeleteCompany(button, companyName) {
             Swal.fire({
                 title: 'Delete Company?',

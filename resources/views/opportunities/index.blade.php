@@ -106,65 +106,17 @@
                                         <div class="flex items-center">
                                             <!-- Company Logo -->
                                             <div class="flex-shrink-0 mr-4">
-                                                @php
-                                                    // Generate multiple logo sources with aggressive domain detection
-                                                    $logoSources = [];
-                                                    
-                                                    // Method 1: Use website domain if available
-                                                    if(!empty($opportunity->company->website)) {
-                                                        $domain = parse_url($opportunity->company->website, PHP_URL_HOST) ?? $opportunity->company->website;
-                                                        $domain = str_replace(['www.', 'http://', 'https://'], '', strtolower($domain));
-                                                        $logoSources[] = "https://logo.clearbit.com/{$domain}";
-                                                    }
-                                                    
-                                                    // Method 2: Extract domain from email
-                                                    if(!empty($opportunity->company->contact_email)) {
-                                                        $emailDomain = substr(strrchr($opportunity->company->contact_email, "@"), 1);
-                                                        if($emailDomain && !in_array($emailDomain, ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com'])) {
-                                                            $logoSources[] = "https://logo.clearbit.com/{$emailDomain}";
-                                                        }
-                                                    }
-                                                    
-                                                    // Method 3: Guess common domains from company name
-                                                    $companyName = strtolower(trim($opportunity->company->name));
-                                                    $cleanName = preg_replace('/[^a-z0-9]/', '', str_replace([' inc', ' ltd', ' llc', ' corp', ' company', ' co', ' pvt', ' private', ' limited'], '', $companyName));
-                                                    if(strlen($cleanName) >= 3) {
-                                                        $logoSources[] = "https://logo.clearbit.com/{$cleanName}.com";
-                                                        $logoSources[] = "https://logo.clearbit.com/{$cleanName}.lk"; // Sri Lankan domains
-                                                        $logoSources[] = "https://logo.clearbit.com/{$cleanName}.org";
-                                                    }
-                                                    
-                                                    // Method 4: Try with common variations
-                                                    $words = explode(' ', strtolower(trim($opportunity->company->name)));
-                                                    if(count($words) >= 1) {
-                                                        $firstWord = preg_replace('/[^a-z0-9]/', '', $words[0]);
-                                                        if(strlen($firstWord) >= 3) {
-                                                            $logoSources[] = "https://logo.clearbit.com/{$firstWord}.com";
-                                                        }
-                                                    }
-                                                    
-                                                    // Remove duplicates
-                                                    $logoSources = array_unique($logoSources);
-                                                @endphp
-                                                
                                                 <div class="relative w-16 h-16">
-                                                    <!-- Company Logo Image -->
-                                                    @if(count($logoSources) > 0)
-                                                        <img id="logo-{{ $opportunity->id }}" 
-                                                             src="{{ $logoSources[0] }}" 
+                                                    @if($opportunity->company->logo_url)
+                                                        <img src="{{ $opportunity->company->logo_url }}" 
                                                              alt="{{ $opportunity->company->name }} logo"
                                                              class="absolute inset-0 object-contain w-16 h-16 p-2 bg-white border border-gray-200 rounded-md shadow-sm"
-                                                             style="display: block;"
-                                                             onload="this.style.display='block'; document.getElementById('fallback-{{ $opportunity->id }}').style.display='none';"
-                                                             onerror="handleLogoError(this, {{ json_encode(array_slice($logoSources, 1)) }}, '{{ $opportunity->id }}')">
+                                                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'absolute inset-0 flex items-center justify-center w-16 h-16 text-white border border-gray-200 rounded-md shadow-sm bg-gradient-to-br from-teal-500 to-blue-600\'><span class=\'text-lg font-bold\'>{{ strtoupper(substr($opportunity->company->name, 0, 1)) }}</span></div>';">
+                                                    @else
+                                                        <div class="absolute inset-0 flex items-center justify-center w-16 h-16 text-white border border-gray-200 rounded-md shadow-sm bg-gradient-to-br from-teal-500 to-blue-600">
+                                                            <span class="text-lg font-bold">{{ strtoupper(substr($opportunity->company->name, 0, 1)) }}</span>
+                                                        </div>
                                                     @endif
-                                                    
-                                                    <!-- Fallback with company initial -->
-                                                    <div id="fallback-{{ $opportunity->id }}" 
-                                                         class="absolute inset-0 flex items-center justify-center w-16 h-16 text-white border border-gray-200 rounded-md shadow-sm bg-gradient-to-br from-teal-500 to-blue-600"
-                                                         style="display: {{ count($logoSources) > 0 ? 'none' : 'flex' }};">
-                                                        <span class="text-lg font-bold">{{ strtoupper(substr($opportunity->company->name, 0, 1)) }}</span>
-                                                    </div>
                                                 </div>
                                             </div>
                                             <!-- Company Info -->
